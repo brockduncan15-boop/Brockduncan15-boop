@@ -1,0 +1,57 @@
+services:
+  digibyte-core:
+    image: blocknetdx/digibyte:latest
+    restart: unless-stopped
+    command:
+      - digibyted
+      - -printtoconsole
+      - -server=1
+      - -txindex=1
+      - -rpcbind=0.0.0.0
+      - -rpcallowip=0.0.0.0/0
+      - -rpcuser=${DGB_RPC_USER:-digibyte}
+      - -rpcpassword=${DGB_RPC_PASSWORD}
+      - -rpcport=${DGB_RPC_PORT:-14022}
+      - -port=${DGB_P2P_PORT:-12024}
+      - -datadir=/data
+    volumes:
+      - ${APP_DATA_DIR}/digibyte:/data
+    ports:
+      - ${DGB_P2P_PORT:-12024}:${DGB_P2P_PORT:-12024}
+      - ${DGB_RPC_PORT:-14022}:${DGB_RPC_PORT:-14022}
+
+  mining-api:
+    image: ghcr.io/brockduncan15-boop/dgb-mining-api:latest
+    restart: unless-stopped
+    environment:
+      DGB_RPC_URL: http://digibyte-core:${DGB_RPC_PORT:-14022}
+      DGB_RPC_USER: ${DGB_RPC_USER:-digibyte}
+      DGB_RPC_PASSWORD: ${DGB_RPC_PASSWORD}
+      PORT: 3001
+      ALERT_RPC_LATENCY_MS: ${ALERT_RPC_LATENCY_MS:-1000}
+      DASHBOARD_AUTH_ENABLED: ${DASHBOARD_AUTH_ENABLED:-true}
+      DASHBOARD_AUTH_PASSWORD: ${DASHBOARD_AUTH_PASSWORD}
+      DASHBOARD_AUTH_TTL_SECONDS: ${DASHBOARD_AUTH_TTL_SECONDS:-43200}
+      DASHBOARD_AUTH_MAX_FAILED_ATTEMPTS: ${DASHBOARD_AUTH_MAX_FAILED_ATTEMPTS:-5}
+      DASHBOARD_AUTH_FAILURE_WINDOW_SECONDS: ${DASHBOARD_AUTH_FAILURE_WINDOW_SECONDS:-300}
+      DASHBOARD_AUTH_LOCKOUT_SECONDS: ${DASHBOARD_AUTH_LOCKOUT_SECONDS:-900}
+      DASHBOARD_AUTH_SECURE_COOKIES: ${DASHBOARD_AUTH_SECURE_COOKIES:-true}
+      DASHBOARD_AUTH_TRUST_PROXY: ${DASHBOARD_AUTH_TRUST_PROXY:-true}
+      MINER_BINARY: ${MINER_BINARY:-cpuminer}
+      MINER_EXTRA_ARGS: ${MINER_EXTRA_ARGS:-}
+      MINER_DEFAULT_ALGO: ${MINER_DEFAULT_ALGO:-scrypt}
+      MINER_DEFAULT_POOL: ${MINER_DEFAULT_POOL:-stratum+tcp://example-pool:3333}
+      MINER_DEFAULT_USER: ${MINER_DEFAULT_USER:-workername}
+      MINER_DEFAULT_PASS: ${MINER_DEFAULT_PASS:-x}
+    volumes:
+      - ${APP_DATA_DIR}/mining-api:/data
+    depends_on:
+      - digibyte-core
+
+  dashboard:
+    image: ghcr.io/brockduncan15-boop/dgb-dashboard:latest
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    depends_on:
+      - mining-api

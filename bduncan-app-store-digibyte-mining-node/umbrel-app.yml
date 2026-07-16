@@ -1,0 +1,18 @@
+manifestVersion: 1.0.0
+id: bduncan-app-store-digibyte-mining-node
+category: crypto
+name: Digibyte Mining Node
+version: "0.1.0"
+tagline: Run a Digibyte node with a mining control dashboard
+description: >-
+  Umbrel app that packages Digibyte Core, a mining control API, and a web dashboard.
+
+developer: Community
+website: https://digibyte.org/
+submitter: Local
+repo: https://github.com/brockduncan15-boop/Brockduncan15-boop
+support: https://github.com/brockduncan15-boop/Brockduncan15-boop/issues
+port: 8080
+path: ""
+defaultUsername: ""
+defaultPassword: ""
